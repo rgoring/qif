@@ -18,26 +18,18 @@ class Account:
 
     def parse_qif(self, lines):
         for line in lines:
-            field,value = utils.parse_field_and_value(line)
-            if field is None:
-                continue
-
-            if field == 'N':
-                self.name = value
-            elif field == 'T':
-                self.type = value
-            elif field == 'D':
-                self.description = value
-            elif field == 'L':
-                self.credit_limit = value
-            elif field == '/':
-                self.statement_date = value
-            elif field == '$':
-                self.statement_bal = value
-            else:
-                #ignore other commands
-                logger.warning("Unknown parameter in account: {}".format(line))
-                continue
+            match utils.parse_field_and_value(line):
+                case None: continue
+                case ('N', value): self.name           = value
+                case ('T', value): self.type           = value
+                case ('D', value): self.description    = value
+                case ('L', value): self.credit_limit   = value
+                case ('/', value): self.statement_date = value
+                case ('$', value): self.statement_bal  = value
+                case _:
+                    # ignore other commands
+                    logger.warning(f'Unknown parameter in account: {line}')
+                    continue
 
     def add_transaction(self, transaction):
         self.transactions.append(transaction)
